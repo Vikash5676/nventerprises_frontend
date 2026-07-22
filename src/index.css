@@ -1,0 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=Chivo:wght@500;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 210 40% 98%;
+        --foreground: 222 47% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 222 47% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+        --primary: 222 47% 11%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 210 40% 96%;
+        --secondary-foreground: 222 47% 11%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 210 40% 96%;
+        --accent-foreground: 222 47% 11%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 214 32% 82%;
+        --input: 214 32% 82%;
+        --ring: 222 47% 11%;
+        --radius: 0.125rem;
+    }
+}
+
+* {
+    border-color: hsl(var(--border));
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.font-display {
+    font-family: "Chivo", "IBM Plex Sans", sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.font-mono-tab {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+/* Focus ring high contrast */
+.focus-hard:focus-visible {
+    outline: 2px solid #0f172a;
+    outline-offset: 2px;
+}
+
+/* Thermal print preview */
+.thermal-receipt {
+    width: 302px; /* 80mm */
+    background: white;
+    color: #0f172a;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    line-height: 1.35;
+    padding: 12px;
+    border: 1px dashed #94a3b8;
+}
+
+.thermal-receipt hr {
+    border: none;
+    border-top: 1px dashed #64748b;
+    margin: 6px 0;
+}
+
+/* Print rules */
+@media print {
+    @page {
+        size: 80mm auto;
+        margin: 4mm;
+    }
+    body * {
+        visibility: hidden;
+    }
+    .print-area,
+    .print-area * {
+        visibility: visible;
+    }
+    .print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .thermal-receipt {
+        border: none;
+        padding: 0;
+        width: 100%;
+    }
+}
+
+/* Kanban scrollbar */
+.kanban-col::-webkit-scrollbar {
+    width: 6px;
+}
+.kanban-col::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+/* Utility: sharp table */
+table.sharp {
+    border-collapse: collapse;
+    width: 100%;
+}
+table.sharp th,
+table.sharp td {
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    padding: 8px 12px;
+}
+table.sharp thead th {
+    background: #f1f5f9;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: #0f172a;
+    font-weight: 700;
+    border-bottom: 1px solid #cbd5e1;
+}
+table.sharp tbody tr:hover {
+    background: #f8fafc;
+}
