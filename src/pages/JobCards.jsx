@@ -104,7 +104,7 @@ export default function JobCards() {
   };
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow="Service Workflow"
         title="Job Cards"
@@ -122,7 +122,7 @@ export default function JobCards() {
       {open && (
         <form
           onSubmit={submit}
-          className="bg-white border border-slate-300 rounded-sm p-5 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4"
+          className="bg-white border border-slate-300 rounded-sm p-4 sm:p-5 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           data-testid="new-jobcard-form"
         >
           <Field label="Vehicle Plate" required>
@@ -190,7 +190,7 @@ export default function JobCards() {
               ))}
             </select>
           </Field>
-          <Field label="Complaints / Symptoms" className="md:col-span-3">
+          <Field label="Complaints / Symptoms" className="sm:col-span-2 lg:col-span-3">
             <textarea
               data-testid="jc-complaints"
               value={form.complaints}
@@ -199,8 +199,8 @@ export default function JobCards() {
               placeholder="Engine noise from clutch, oil leak near sump…"
             />
           </Field>
-          <Field label="Scratch Map (tap zones with damage)" className="md:col-span-2">
-            <div className="grid grid-cols-3 gap-2 mt-1">
+          <Field label="Scratch Map (tap zones with damage)" className="sm:col-span-2 lg:col-span-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
               {SCRATCH_ZONES.map((z) => {
                 const active = form.scratch_map.includes(z);
                 return (
@@ -215,7 +215,7 @@ export default function JobCards() {
                           : [...form.scratch_map, z],
                       )
                     }
-                    className={`text-xs px-2 py-2 border rounded-sm uppercase font-bold tracking-wider transition-colors ${
+                    className={`text-[11px] px-2 py-2 border rounded-sm uppercase font-bold tracking-wider transition-colors ${
                       active
                         ? "bg-red-50 border-red-400 text-red-700"
                         : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
@@ -236,7 +236,7 @@ export default function JobCards() {
             />
           </Field>
 
-          <div className="md:col-span-3 flex justify-end gap-3">
+          <div className="sm:col-span-2 lg:col-span-3 flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setForm(emptyForm)}
@@ -258,13 +258,13 @@ export default function JobCards() {
         </form>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4" data-testid="jc-kanban">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" data-testid="jc-kanban">
         {STATUSES.map((col) => {
           const list = cards.filter((c) => c.status === col.key);
           return (
             <div
               key={col.key}
-              className="bg-white border border-slate-300 rounded-sm flex flex-col min-h-[400px]"
+              className="bg-white border border-slate-300 rounded-sm flex flex-col min-h-[300px] sm:min-h-[400px]"
               data-testid={`kanban-col-${col.key}`}
             >
               <div className="px-3 py-2 border-b border-slate-300 flex items-center justify-between">
@@ -282,7 +282,7 @@ export default function JobCards() {
                     className="border border-slate-300 rounded-sm p-3 bg-slate-50"
                     data-testid={`jc-card-${jc.id}`}
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1 gap-2">
                       <Plate>{jc.vehicle_number}</Plate>
                       <StatusPill status={jc.status} />
                     </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, formatINR } from "@/lib/api";
 import { PageHeader, StatusPill, Plate } from "@/components/app/ui";
-import { TrendingUp, TrendingDown, Bike, Wallet2, RefreshCw, AlertTriangle } from "lucide-react";
+import { TrendingUp, TrendingDown, Bike, Wallet as Wallet2, RefreshCw, TriangleAlert as AlertTriangle } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,16 +14,16 @@ import {
 
 const KPI = ({ label, value, icon: Icon, tone = "slate", testid }) => (
   <div
-    className="bg-white border border-slate-300 rounded-sm p-5 flex flex-col justify-between min-h-[130px]"
+    className="bg-white border border-slate-300 rounded-sm p-4 sm:p-5 flex flex-col justify-between min-h-[110px] sm:min-h-[130px]"
     data-testid={testid}
   >
-    <div className="flex items-center justify-between">
-      <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
+    <div className="flex items-center justify-between gap-2">
+      <div className="text-[10px] sm:text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
         {label}
       </div>
-      <Icon className={`w-4 h-4 text-${tone}-600`} strokeWidth={2.25} />
+      <Icon className={`w-4 h-4 text-${tone}-600 shrink-0`} strokeWidth={2.25} />
     </div>
-    <div className="font-display font-black text-slate-900 text-3xl md:text-4xl tracking-tight break-all">
+    <div className="font-display font-black text-slate-900 text-2xl sm:text-3xl md:text-4xl tracking-tight break-all">
       {value}
     </div>
   </div>
@@ -45,7 +45,7 @@ export default function Dashboard() {
     );
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow="Overview · Today"
         title="Shop Command Deck"
@@ -60,7 +60,7 @@ export default function Dashboard() {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <KPI
           label="Today's Sales"
           value={formatINR(data.sales_today)}
@@ -76,7 +76,7 @@ export default function Dashboard() {
           testid="kpi-expenses"
         />
         <KPI
-          label="Active Bikes in Garage"
+          label="Active Bikes"
           value={String(data.active_bikes).padStart(2, "0")}
           icon={Bike}
           tone="amber"
@@ -92,37 +92,37 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm p-4" data-testid="sales-trend">
+        <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm p-3 sm:p-4" data-testid="sales-trend">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
+              <div className="text-[10px] sm:text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
                 Last 7 Days
               </div>
-              <h2 className="font-display font-bold uppercase tracking-tight text-slate-900">
+              <h2 className="font-display font-bold uppercase tracking-tight text-slate-900 text-sm sm:text-base">
                 Sales Trend
               </h2>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-mono-tab uppercase text-slate-500">
+              <div className="text-[9px] sm:text-[10px] font-mono-tab uppercase text-slate-500">
                 7-Day Total
               </div>
-              <div className="font-display font-black text-lg text-slate-900">
+              <div className="font-display font-black text-base sm:text-lg text-slate-900">
                 {formatINR(data.sales_trend.reduce((s, d) => s + d.sales, 0))}
               </div>
             </div>
           </div>
           <div style={{ width: "100%", height: 200 }}>
             <ResponsiveContainer>
-              <BarChart data={data.sales_trend} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+              <BarChart data={data.sales_trend} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fill: "#475569", fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  tick={{ fill: "#475569", fontSize: 10, fontFamily: "JetBrains Mono" }}
                   tickLine={false}
                   axisLine={{ stroke: "#cbd5e1" }}
                 />
                 <YAxis
-                  tick={{ fill: "#475569", fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  tick={{ fill: "#475569", fontSize: 10, fontFamily: "JetBrains Mono" }}
                   tickLine={false}
                   axisLine={{ stroke: "#cbd5e1" }}
                 />
@@ -143,17 +143,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-300 rounded-sm p-4" data-testid="low-stock-heatmap">
+        <div className="bg-white border border-slate-300 rounded-sm p-3 sm:p-4" data-testid="low-stock-heatmap">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
+              <div className="text-[10px] sm:text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
                 Reorder Now
               </div>
-              <h2 className="font-display font-bold uppercase tracking-tight text-slate-900">
+              <h2 className="font-display font-bold uppercase tracking-tight text-slate-900 text-sm sm:text-base">
                 Low-Stock Heatmap
               </h2>
             </div>
-            <AlertTriangle className="w-4 h-4 text-red-600" />
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
           </div>
           <div className="space-y-1.5 max-h-52 overflow-auto">
             {data.low_stock.length === 0 && (
@@ -176,10 +176,10 @@ export default function Dashboard() {
                       {it.rack_location || "—"}
                     </div>
                   </div>
-                  <div className="w-20 bg-slate-100 h-2 rounded-sm overflow-hidden">
+                  <div className="w-16 sm:w-20 bg-slate-100 h-2 rounded-sm overflow-hidden shrink-0">
                     <div className={`h-full ${bg}`} style={{ width: `${Math.max(6, ratio * 100)}%` }} />
                   </div>
-                  <div className="font-mono-tab font-bold text-slate-900 text-right w-14">
+                  <div className="font-mono-tab font-bold text-slate-900 text-right w-14 shrink-0 text-[11px]">
                     {it.stock}/{it.low_stock_threshold}
                   </div>
                 </div>
@@ -191,8 +191,8 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-white border border-slate-300 rounded-sm">
-          <div className="px-4 py-3 border-b border-slate-300 flex items-center justify-between">
-            <h2 className="font-display font-bold uppercase tracking-tight text-slate-900">
+          <div className="px-3 sm:px-4 py-3 border-b border-slate-300 flex items-center justify-between">
+            <h2 className="font-display font-bold uppercase tracking-tight text-slate-900 text-sm sm:text-base">
               Active Vehicles in Shop
             </h2>
             <span className="font-mono-tab text-xs text-slate-500">
@@ -239,8 +239,8 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white border border-slate-300 rounded-sm">
-          <div className="px-4 py-3 border-b border-slate-300 flex items-center justify-between">
-            <h2 className="font-display font-bold uppercase tracking-tight text-slate-900">
+          <div className="px-3 sm:px-4 py-3 border-b border-slate-300 flex items-center justify-between">
+            <h2 className="font-display font-bold uppercase tracking-tight text-slate-900 text-sm sm:text-base">
               Recent Transactions
             </h2>
             <span className="font-mono-tab text-xs text-slate-500">

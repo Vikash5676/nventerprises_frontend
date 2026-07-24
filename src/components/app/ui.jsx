@@ -1,15 +1,17 @@
 export function PageHeader({ eyebrow, title, actions }) {
   return (
-    <div className="flex items-end justify-between border-b border-slate-300 pb-4 mb-6">
-      <div>
-        <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500 mb-1">
+    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-slate-300 pb-4 mb-6">
+      <div className="min-w-0">
+        <div className="text-[10px] sm:text-[11px] font-mono-tab uppercase tracking-widest text-slate-500 mb-1">
           {eyebrow}
         </div>
-        <h1 className="font-display font-black text-3xl md:text-4xl uppercase tracking-tight text-slate-900">
+        <h1 className="font-display font-black text-2xl sm:text-3xl md:text-4xl uppercase tracking-tight text-slate-900 leading-tight">
           {title}
         </h1>
       </div>
-      <div className="flex items-center gap-2">{actions}</div>
+      {actions && (
+        <div className="flex items-center gap-2 flex-wrap">{actions}</div>
+      )}
     </div>
   );
 }
@@ -33,7 +35,7 @@ export function StatusPill({ status }) {
 
 export function Plate({ children }) {
   return (
-    <span className="font-mono-tab font-bold text-slate-900 bg-yellow-100 border border-slate-900 px-1.5 py-0.5 text-xs tracking-widest">
+    <span className="font-mono-tab font-bold text-slate-900 bg-yellow-100 border border-slate-900 px-1.5 py-0.5 text-xs tracking-widest whitespace-nowrap">
       {children}
     </span>
   );

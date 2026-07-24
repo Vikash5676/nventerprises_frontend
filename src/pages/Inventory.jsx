@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, formatINR } from "@/lib/api";
 import { PageHeader } from "@/components/app/ui";
-import { Search, Plus, Save, X, AlertTriangle, Trash2, PackagePlus, Upload } from "lucide-react";
+import { Search, Plus, Save, X, TriangleAlert as AlertTriangle, Trash2, PackagePlus, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
@@ -32,6 +32,7 @@ export default function Inventory() {
   useEffect(() => {
     load();
     searchRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     const t = setTimeout(load, 200);
@@ -77,12 +78,12 @@ export default function Inventory() {
   ).length;
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow={`Parts & Services · ${items.length} items · ${lowCount} low stock`}
         title="Inventory"
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <label
               data-testid="csv-import-btn"
               className="cursor-pointer inline-flex items-center gap-2 border border-slate-900 text-slate-900 px-3 py-2 rounded-sm font-bold uppercase tracking-wider text-xs hover:bg-slate-100 transition-colors"
@@ -145,7 +146,7 @@ export default function Inventory() {
       />
 
       <div className="bg-white border border-slate-300 rounded-sm p-3 mb-4 flex items-center gap-3">
-        <Search className="w-4 h-4 text-slate-500" />
+        <Search className="w-4 h-4 text-slate-500 shrink-0" />
         <input
           ref={searchRef}
           autoFocus
@@ -153,10 +154,10 @@ export default function Inventory() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Scan barcode or search part name / HSN…"
-          className="flex-1 bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900"
+          className="flex-1 bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900 min-w-0"
         />
         {q && (
-          <button onClick={() => setQ("")} className="text-slate-500 hover:text-slate-900">
+          <button onClick={() => setQ("")} className="text-slate-500 hover:text-slate-900 shrink-0">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -166,9 +167,9 @@ export default function Inventory() {
         <form
           onSubmit={submit}
           data-testid="inv-form"
-          className="bg-white border border-slate-300 rounded-sm p-5 mb-4 grid grid-cols-1 md:grid-cols-4 gap-4"
+          className="bg-white border border-slate-300 rounded-sm p-4 sm:p-5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
         >
-          <F label="Name" span="md:col-span-2">
+          <F label="Name" span="sm:col-span-2">
             <input required className="input" value={form.name} onChange={(e) => setF("name", e.target.value)} data-testid="inv-name" />
           </F>
           <F label="Item Type">
@@ -216,7 +217,7 @@ export default function Inventory() {
               ))}
             </select>
           </F>
-          <div className="md:col-span-4 flex justify-end gap-2">
+          <div className="sm:col-span-2 lg:col-span-4 flex justify-end gap-2">
             <button type="button" onClick={() => setShowForm(false)} className="border border-slate-900 text-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100">
               Cancel
             </button>
@@ -235,12 +236,11 @@ export default function Inventory() {
               <tr>
                 <th>Name</th>
                 <th>Type</th>
-                <th>HSN/SAC</th>
                 <th className="text-right">Stock</th>
-                <th className="text-right">Threshold</th>
-                <th>Rack</th>
+                <th className="text-right hidden sm:table-cell">Threshold</th>
+                <th className="hidden md:table-cell">Rack</th>
                 <th className="text-right">Price</th>
-                <th className="text-right">GST</th>
+                <th className="text-right hidden sm:table-cell">GST</th>
                 <th></th>
               </tr>
             </thead>
@@ -251,24 +251,26 @@ export default function Inventory() {
                   <tr key={i.id} className={low ? "bg-red-50" : ""} data-testid={`inv-row-${i.id}`}>
                     <td className="font-semibold text-slate-900 cursor-pointer" onClick={() => startEdit(i)}>
                       {i.name}
+                      <span className="block text-[10px] text-slate-500 sm:hidden">
+                        {i.rack_location || "—"} · {i.gst_rate}% GST
+                      </span>
                     </td>
                     <td>
                       <span className={`text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-sm border ${i.item_type === "labor" ? "border-blue-300 bg-blue-50 text-blue-800" : "border-slate-300 bg-slate-100 text-slate-700"}`}>
                         {i.item_type === "labor" ? "Labor" : "Part"}
                       </span>
                     </td>
-                    <td className="font-mono-tab text-slate-700">{i.hsn_sac || "—"}</td>
                     <td className="text-right font-mono-tab font-bold text-slate-900">
                       {i.item_type === "labor" ? "—" : i.stock}
                     </td>
-                    <td className="text-right font-mono-tab text-slate-600">
+                    <td className="text-right font-mono-tab text-slate-600 hidden sm:table-cell">
                       {i.item_type === "labor" ? "—" : i.low_stock_threshold}
                     </td>
-                    <td className="font-mono-tab text-slate-700">{i.rack_location || "—"}</td>
+                    <td className="font-mono-tab text-slate-700 hidden md:table-cell">{i.rack_location || "—"}</td>
                     <td className="text-right font-mono-tab font-bold text-slate-900">
                       {formatINR(i.unit_price)}
                     </td>
-                    <td className="text-right font-mono-tab text-slate-700">{i.gst_rate}%</td>
+                    <td className="text-right font-mono-tab text-slate-700 hidden sm:table-cell">{i.gst_rate}%</td>
                     <td>
                       <div className="flex items-center gap-2 justify-end">
                         {low && (
@@ -286,7 +288,7 @@ export default function Inventory() {
               })}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan="9" className="text-center py-8 text-slate-500">
+                  <td colSpan="8" className="text-center py-8 text-slate-500">
                     <PackagePlus className="w-6 h-6 mx-auto mb-2 text-slate-400" />
                     No items found.
                   </td>

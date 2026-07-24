@@ -67,7 +67,7 @@ export default function Expenses() {
   };
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow="Expenses · GST Reports"
         title="Books & Compliance"
@@ -78,7 +78,7 @@ export default function Expenses() {
                 key={t}
                 onClick={() => setTab(t)}
                 data-testid={`tab-${t}`}
-                className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm border transition-colors ${
+                className={`px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm border transition-colors ${
                   tab === t
                     ? "bg-slate-900 text-white border-slate-900"
                     : "bg-white text-slate-900 border-slate-900 hover:bg-slate-100"
@@ -96,7 +96,7 @@ export default function Expenses() {
           <form
             onSubmit={submit}
             data-testid="expense-form"
-            className="bg-white border border-slate-300 rounded-sm p-4 mb-4 grid grid-cols-1 md:grid-cols-5 gap-3"
+            className="bg-white border border-slate-300 rounded-sm p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"
           >
             <F label="Category">
               <select className="input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
@@ -111,65 +111,70 @@ export default function Expenses() {
             <F label="Date">
               <input type="date" className="input font-mono-tab" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
             </F>
-            <F label="Note" span="md:col-span-2">
+            <F label="Note" span="sm:col-span-2 lg:col-span-2">
               <input className="input" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
             </F>
-            <div className="md:col-span-5 flex justify-between items-center">
+            <div className="sm:col-span-2 lg:col-span-5 flex flex-col sm:flex-row justify-between items-center gap-2">
               <div className="text-xs font-mono-tab uppercase tracking-widest text-slate-600">
                 {month} Total: <span className="text-slate-900 font-black">{formatINR(monthTotal)}</span>
               </div>
-              <button data-testid="exp-save" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-sm">
+              <button data-testid="exp-save" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-sm w-full sm:w-auto">
                 <Plus className="w-3.5 h-3.5" /> Log Expense
               </button>
             </div>
           </form>
 
-          <div className="bg-white border border-slate-300 rounded-sm">
-            <div className="px-4 py-3 border-b border-slate-300 font-display font-bold uppercase text-slate-900 tracking-tight">
+          <div className="bg-white border border-slate-300 rounded-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-300 font-display font-bold uppercase text-slate-900 tracking-tight text-sm">
               Recent Expenses
             </div>
-            <table className="sharp text-sm" data-testid="expenses-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Category</th>
-                  <th>Note</th>
-                  <th>Source</th>
-                  <th className="text-right">Amount</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map((e) => (
-                  <tr key={e.id}>
-                    <td className="font-mono-tab">{e.date}</td>
-                    <td className="font-semibold">{e.category}</td>
-                    <td className="text-slate-600">{e.note}</td>
-                    <td className="text-[10px] uppercase tracking-widest text-slate-500">{e.source}</td>
-                    <td className="text-right font-mono-tab font-bold">{formatINR(e.amount)}</td>
-                    <td>
-                      <button onClick={() => remove(e.id)} className="text-slate-400 hover:text-red-600">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {expenses.length === 0 && (
+            <div className="overflow-auto">
+              <table className="sharp text-sm" data-testid="expenses-table">
+                <thead>
                   <tr>
-                    <td colSpan="6" className="text-center text-slate-500 py-6">
-                      No expenses recorded yet.
-                    </td>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th className="hidden sm:table-cell">Note</th>
+                    <th className="hidden md:table-cell">Source</th>
+                    <th className="text-right">Amount</th>
+                    <th></th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {expenses.map((e) => (
+                    <tr key={e.id}>
+                      <td className="font-mono-tab">{e.date}</td>
+                      <td className="font-semibold">
+                        {e.category}
+                        <span className="block text-[10px] text-slate-500 sm:hidden">{e.note || "—"}</span>
+                      </td>
+                      <td className="text-slate-600 hidden sm:table-cell">{e.note}</td>
+                      <td className="text-[10px] uppercase tracking-widest text-slate-500 hidden md:table-cell">{e.source}</td>
+                      <td className="text-right font-mono-tab font-bold">{formatINR(e.amount)}</td>
+                      <td>
+                        <button onClick={() => remove(e.id)} className="text-slate-400 hover:text-red-600">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {expenses.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center text-slate-500 py-6">
+                        No expenses recorded yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
 
       {tab === "gst" && (
         <div>
-          <div className="bg-white border border-slate-300 rounded-sm p-4 mb-4 flex items-end justify-between gap-4">
+          <div className="bg-white border border-slate-300 rounded-sm p-4 mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-slate-700 mb-1">
                 Reporting Month
@@ -182,7 +187,7 @@ export default function Expenses() {
                 className="border border-slate-300 rounded-sm px-3 py-2 font-mono-tab focus:outline-none focus:border-slate-900"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={async () => {
                   if (!gstr1) return;
@@ -204,7 +209,7 @@ export default function Expenses() {
                 data-testid="export-gstr1-json"
                 className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm"
               >
-                <Download className="w-3.5 h-3.5" /> GSTR-1 Portal JSON
+                <Download className="w-3.5 h-3.5" /> GSTR-1 JSON
               </button>
               <button
                 onClick={() => gstr1 && csvExport(gstr1.rows, `GSTR1-${month}.csv`)}
@@ -220,100 +225,110 @@ export default function Expenses() {
                 data-testid="export-gstr3b"
                 className="inline-flex items-center gap-2 border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100"
               >
-                <Download className="w-3.5 h-3.5" /> Export GSTR-3B CSV
+                <Download className="w-3.5 h-3.5" /> GSTR-3B CSV
               </button>
             </div>
           </div>
 
           {gstr1 && (
-            <div className="bg-white border border-slate-300 rounded-sm mb-4" data-testid="gstr1-panel">
+            <div className="bg-white border border-slate-300 rounded-sm mb-4 overflow-hidden" data-testid="gstr1-panel">
               <div className="px-4 py-3 border-b border-slate-300 flex items-center justify-between">
-                <div className="font-display font-bold uppercase text-slate-900 tracking-tight flex items-center gap-2">
+                <div className="font-display font-bold uppercase text-slate-900 tracking-tight flex items-center gap-2 text-sm">
                   <FileText className="w-4 h-4" /> GSTR-1 · Outward Supplies
                 </div>
                 <span className="font-mono-tab text-xs text-slate-500">{gstr1.rows.length} invoices</span>
               </div>
-              <table className="sharp text-sm">
-                <thead>
-                  <tr>
-                    <th>Invoice</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>GSTIN</th>
-                    <th>State</th>
-                    <th className="text-right">Taxable</th>
-                    <th className="text-right">CGST</th>
-                    <th className="text-right">SGST</th>
-                    <th className="text-right">IGST</th>
-                    <th className="text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gstr1.rows.map((r) => (
-                    <tr key={r.invoice_no}>
-                      <td className="font-mono-tab">{r.invoice_no}</td>
-                      <td className="font-mono-tab">{r.date}</td>
-                      <td className="font-semibold">{r.customer_name}</td>
-                      <td className="font-mono-tab">{r.customer_gstin || "—"}</td>
-                      <td>{r.customer_state}</td>
-                      <td className="text-right font-mono-tab">{formatINR(r.taxable)}</td>
-                      <td className="text-right font-mono-tab">{formatINR(r.cgst)}</td>
-                      <td className="text-right font-mono-tab">{formatINR(r.sgst)}</td>
-                      <td className="text-right font-mono-tab">{formatINR(r.igst)}</td>
-                      <td className="text-right font-mono-tab font-bold">{formatINR(r.total)}</td>
-                    </tr>
-                  ))}
-                  {gstr1.rows.length === 0 && (
+              <div className="overflow-auto">
+                <table className="sharp text-sm">
+                  <thead>
                     <tr>
-                      <td colSpan="10" className="text-center text-slate-500 py-6">
-                        No invoices in this month.
-                      </td>
+                      <th>Invoice</th>
+                      <th>Date</th>
+                      <th>Customer</th>
+                      <th className="hidden md:table-cell">GSTIN</th>
+                      <th className="hidden lg:table-cell">State</th>
+                      <th className="text-right">Taxable</th>
+                      <th className="text-right hidden sm:table-cell">CGST</th>
+                      <th className="text-right hidden sm:table-cell">SGST</th>
+                      <th className="text-right hidden sm:table-cell">IGST</th>
+                      <th className="text-right">Total</th>
                     </tr>
-                  )}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-slate-100">
-                    <td colSpan="5" className="text-right font-bold uppercase tracking-widest text-xs">
-                      Totals
-                    </td>
-                    <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.taxable)}</td>
-                    <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.cgst)}</td>
-                    <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.sgst)}</td>
-                    <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.igst)}</td>
-                    <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.total)}</td>
-                  </tr>
-                </tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {gstr1.rows.map((r) => (
+                      <tr key={r.invoice_no}>
+                        <td className="font-mono-tab">{r.invoice_no}</td>
+                        <td className="font-mono-tab">{r.date}</td>
+                        <td className="font-semibold">
+                          {r.customer_name}
+                          <span className="block text-[10px] text-slate-500 md:hidden">{r.customer_gstin || "—"} · {r.customer_state}</span>
+                        </td>
+                        <td className="font-mono-tab hidden md:table-cell">{r.customer_gstin || "—"}</td>
+                        <td className="hidden lg:table-cell">{r.customer_state}</td>
+                        <td className="text-right font-mono-tab">{formatINR(r.taxable)}</td>
+                        <td className="text-right font-mono-tab hidden sm:table-cell">{formatINR(r.cgst)}</td>
+                        <td className="text-right font-mono-tab hidden sm:table-cell">{formatINR(r.sgst)}</td>
+                        <td className="text-right font-mono-tab hidden sm:table-cell">{formatINR(r.igst)}</td>
+                        <td className="text-right font-mono-tab font-bold">{formatINR(r.total)}</td>
+                      </tr>
+                    ))}
+                    {gstr1.rows.length === 0 && (
+                      <tr>
+                        <td colSpan="10" className="text-center text-slate-500 py-6">
+                          No invoices in this month.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-slate-100">
+                      <td colSpan="5" className="text-right font-bold uppercase tracking-widest text-xs hidden sm:table-cell">
+                        Totals
+                      </td>
+                      <td colSpan="3" className="text-right font-bold uppercase tracking-widest text-xs sm:hidden">
+                        Totals
+                      </td>
+                      <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.taxable)}</td>
+                      <td className="text-right font-mono-tab font-black hidden sm:table-cell">{formatINR(gstr1.totals.cgst)}</td>
+                      <td className="text-right font-mono-tab font-black hidden sm:table-cell">{formatINR(gstr1.totals.sgst)}</td>
+                      <td className="text-right font-mono-tab font-black hidden sm:table-cell">{formatINR(gstr1.totals.igst)}</td>
+                      <td className="text-right font-mono-tab font-black">{formatINR(gstr1.totals.total)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           )}
 
           {gstr3b && (
-            <div className="bg-white border border-slate-300 rounded-sm" data-testid="gstr3b-panel">
-              <div className="px-4 py-3 border-b border-slate-300 font-display font-bold uppercase text-slate-900 tracking-tight flex items-center gap-2">
+            <div className="bg-white border border-slate-300 rounded-sm overflow-hidden" data-testid="gstr3b-panel">
+              <div className="px-4 py-3 border-b border-slate-300 font-display font-bold uppercase text-slate-900 tracking-tight flex items-center gap-2 text-sm">
                 <FileText className="w-4 h-4" /> GSTR-3B · Summary
               </div>
-              <table className="sharp text-sm">
-                <thead>
-                  <tr>
-                    <th>Nature</th>
-                    <th className="text-right">Taxable</th>
-                    <th className="text-right">CGST</th>
-                    <th className="text-right">SGST</th>
-                    <th className="text-right">IGST</th>
-                    <th className="text-right">Total Tax</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="font-semibold">Outward Taxable Supplies</td>
-                    <td className="text-right font-mono-tab">{formatINR(gstr3b.outward_supplies.taxable)}</td>
-                    <td className="text-right font-mono-tab">{formatINR(gstr3b.outward_supplies.cgst)}</td>
-                    <td className="text-right font-mono-tab">{formatINR(gstr3b.outward_supplies.sgst)}</td>
-                    <td className="text-right font-mono-tab">{formatINR(gstr3b.outward_supplies.igst)}</td>
-                    <td className="text-right font-mono-tab font-bold">{formatINR(gstr3b.outward_supplies.total_tax)}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="overflow-auto">
+                <table className="sharp text-sm">
+                  <thead>
+                    <tr>
+                      <th>Nature</th>
+                      <th className="text-right">Taxable</th>
+                      <th className="text-right hidden sm:table-cell">CGST</th>
+                      <th className="text-right hidden sm:table-cell">SGST</th>
+                      <th className="text-right hidden sm:table-cell">IGST</th>
+                      <th className="text-right">Total Tax</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="font-semibold">Outward Taxable Supplies</td>
+                      <td className="text-right font-mono-tab">{formatINR(gstr3b.outward_supplies.taxable)}</td>
+                      <td className="text-right font-mono-tab hidden sm:table-cell">{formatINR(gstr3b.outward_supplies.cgst)}</td>
+                      <td className="text-right font-mono-tab hidden sm:table-cell">{formatINR(gstr3b.outward_supplies.sgst)}</td>
+                      <td className="text-right font-mono-tab hidden sm:table-cell">{formatINR(gstr3b.outward_supplies.igst)}</td>
+                      <td className="text-right font-mono-tab font-bold">{formatINR(gstr3b.outward_supplies.total_tax)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

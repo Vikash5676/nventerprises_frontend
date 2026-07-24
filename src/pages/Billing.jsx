@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { api, formatINR } from "@/lib/api";
 import { useShop } from "@/context/ShopContext";
 import { PageHeader, Plate } from "@/components/app/ui";
-import { Search, Trash2, Printer, Save, Loader2, Percent } from "lucide-react";
+import { Search, Trash2, Printer, Save, Loader as Loader2, Percent } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Billing() {
@@ -19,10 +19,10 @@ export default function Billing() {
     job_card_id: "",
   });
   const [split, setSplit] = useState({ cash: 0, upi: 0, udhaar: 0 });
-  const [discount, setDiscount] = useState({ type: "", value: 0 }); // "" | "amount" | "percent"
+  const [discount, setDiscount] = useState({ type: "", value: 0 });
   const [jobCards, setJobCards] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(null); // saved invoice for print
+  const [saved, setSaved] = useState(null);
   const { shop } = useShop();
   const searchRef = useRef(null);
 
@@ -51,8 +51,6 @@ export default function Billing() {
       .slice(0, 8);
   }, [q, items]);
 
-  // Exact barcode auto-add (scanner sends full code fast; then presses Enter which we handle via onKeyDown).
-  // Additionally auto-add if the typed value exactly matches a barcode and length >= 6 (scanner suffix behavior).
   useEffect(() => {
     if (!q || q.length < 6) return;
     const exact = items.find((i) => i.barcode === q);
@@ -113,7 +111,6 @@ export default function Billing() {
 
   const removeLine = (i) => setLines((L) => L.filter((_, idx) => idx !== i));
 
-  // Live totals (mirror backend compute_invoice_totals: apply discount pre-tax proportionally)
   const totals = useMemo(() => {
     const same = (customer.customer_state || "").toLowerCase() === (shop.state || "").toLowerCase();
     const grossSubtotal = lines.reduce(
@@ -223,12 +220,12 @@ export default function Billing() {
   if (saved) return <PrintPreview invoice={saved} shop={shop} onNew={newInvoice} />;
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow="Keyboard-First · Live GST"
         title="Billing Counter"
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={newInvoice}
               className="border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100"
@@ -249,11 +246,10 @@ export default function Billing() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* LEFT: search + line entry */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white border border-slate-300 rounded-sm p-3 relative">
             <div className="flex items-center gap-3">
-              <Search className="w-4 h-4 text-slate-500" />
+              <Search className="w-4 h-4 text-slate-500 shrink-0" />
               <input
                 ref={searchRef}
                 autoFocus
@@ -265,9 +261,9 @@ export default function Billing() {
                 }}
                 onKeyDown={onSearchKey}
                 placeholder="Scan barcode or search part / labor…  (Enter to add)"
-                className="flex-1 bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900"
+                className="flex-1 bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900 min-w-0"
               />
-              <span className="text-[10px] font-mono-tab uppercase text-slate-500">↵ Enter · ↑↓ Nav</span>
+              <span className="hidden md:inline text-[10px] font-mono-tab uppercase text-slate-500 shrink-0">↵ Enter · ↑↓ Nav</span>
             </div>
             {filtered.length > 0 && (
               <div className="mt-2 border-t border-slate-200 divide-y divide-slate-100">
@@ -275,18 +271,17 @@ export default function Billing() {
                   <button
                     key={it.id}
                     onClick={() => addLine(it)}
-                    className={`w-full text-left px-2 py-2 text-sm flex items-center justify-between ${
+                    className={`w-full text-left px-2 py-2 text-sm flex items-center justify-between gap-2 ${
                       i === highlight ? "bg-slate-100" : "hover:bg-slate-50"
                     }`}
                   >
-                    <div>
-                      <div className="font-semibold text-slate-900">{it.name}</div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-slate-900 truncate">{it.name}</div>
                       <div className="text-[11px] text-slate-500 font-mono-tab">
-                        {it.item_type === "labor" ? "LABOR" : "PART"} · HSN {it.hsn_sac || "—"} · GST {it.gst_rate}% · Stock{" "}
-                        {it.item_type === "labor" ? "—" : it.stock}
+                        {it.item_type === "labor" ? "LABOR" : "PART"} · HSN {it.hsn_sac || "—"} · GST {it.gst_rate}%
                       </div>
                     </div>
-                    <div className="font-mono-tab font-bold">{formatINR(it.unit_price)}</div>
+                    <div className="font-mono-tab font-bold shrink-0">{formatINR(it.unit_price)}</div>
                   </button>
                 ))}
               </div>
@@ -294,7 +289,7 @@ export default function Billing() {
           </div>
 
           <div className="bg-white border border-slate-300 rounded-sm">
-            <div className="px-4 py-2 border-b border-slate-300 flex items-center justify-between">
+            <div className="px-3 sm:px-4 py-2 border-b border-slate-300 flex items-center justify-between">
               <div className="text-xs font-bold uppercase tracking-widest text-slate-900">
                 Invoice Lines
               </div>
@@ -307,11 +302,10 @@ export default function Billing() {
                 <thead>
                   <tr>
                     <th>Item</th>
-                    <th>HSN</th>
                     <th className="text-right">Qty</th>
                     <th className="text-right">Price</th>
-                    <th className="text-right">GST</th>
-                    <th className="text-right">Tax</th>
+                    <th className="text-right hidden sm:table-cell">GST</th>
+                    <th className="text-right hidden sm:table-cell">Tax</th>
                     <th className="text-right">Total</th>
                     <th></th>
                   </tr>
@@ -324,8 +318,10 @@ export default function Billing() {
                         <span className="ml-2 text-[10px] uppercase text-slate-500">
                           {l.item_type}
                         </span>
+                        <span className="block text-[10px] text-slate-500 sm:hidden font-mono-tab">
+                          GST {l.gst_rate}% · Tax {formatINR(l.cgst + l.sgst + l.igst)}
+                        </span>
                       </td>
-                      <td className="font-mono-tab text-slate-600">{l.hsn_sac || "—"}</td>
                       <td className="text-right">
                         <input
                           type="number"
@@ -333,7 +329,7 @@ export default function Billing() {
                           step="0.5"
                           value={l.qty}
                           onChange={(e) => updateLine(i, { qty: Number(e.target.value) })}
-                          className="w-16 text-right border border-slate-300 rounded-sm px-1.5 py-1 font-mono-tab"
+                          className="w-14 text-right border border-slate-300 rounded-sm px-1.5 py-1 font-mono-tab"
                         />
                       </td>
                       <td className="text-right">
@@ -345,8 +341,8 @@ export default function Billing() {
                           className="w-20 text-right border border-slate-300 rounded-sm px-1.5 py-1 font-mono-tab"
                         />
                       </td>
-                      <td className="text-right font-mono-tab">{l.gst_rate}%</td>
-                      <td className="text-right font-mono-tab text-slate-700">
+                      <td className="text-right font-mono-tab hidden sm:table-cell">{l.gst_rate}%</td>
+                      <td className="text-right font-mono-tab text-slate-700 hidden sm:table-cell">
                         {formatINR(l.cgst + l.sgst + l.igst)}
                       </td>
                       <td className="text-right font-mono-tab font-bold">
@@ -364,7 +360,7 @@ export default function Billing() {
                   ))}
                   {lines.length === 0 && (
                     <tr>
-                      <td colSpan="8" className="text-center py-10 text-slate-500 font-mono-tab uppercase text-xs">
+                      <td colSpan="7" className="text-center py-10 text-slate-500 font-mono-tab uppercase text-xs">
                         Scan or search a part to begin
                       </td>
                     </tr>
@@ -375,7 +371,6 @@ export default function Billing() {
           </div>
         </div>
 
-        {/* RIGHT: draft */}
         <div className="space-y-4">
           <div className="bg-white border border-slate-300 rounded-sm p-4">
             <div className="text-xs font-bold uppercase tracking-widest text-slate-900 mb-3">
@@ -492,7 +487,7 @@ export default function Billing() {
               <div className="text-xs font-bold uppercase tracking-widest text-slate-900">
                 Grand Total
               </div>
-              <div className="font-display font-black text-2xl text-slate-900" data-testid="bill-grand-total">
+              <div className="font-display font-black text-xl sm:text-2xl text-slate-900" data-testid="bill-grand-total">
                 {formatINR(totals.grand)}
               </div>
             </div>
@@ -568,18 +563,17 @@ const Row = ({ label, value, tone = "slate" }) => (
 
 function PrintPreview({ invoice, shop, onNew }) {
   useEffect(() => {
-    // Auto trigger print
     const t = setTimeout(() => window.print(), 300);
     return () => clearTimeout(t);
   }, []);
   return (
-    <div className="p-6 md:p-8">
-      <div className="no-print flex items-center justify-between mb-4">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div>
           <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500">
             Invoice Saved
           </div>
-          <h1 className="font-display font-black text-3xl text-slate-900 uppercase tracking-tight">
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 uppercase tracking-tight">
             {invoice.invoice_no}
           </h1>
         </div>

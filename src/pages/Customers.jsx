@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, formatINR } from "@/lib/api";
 import { PageHeader, Plate } from "@/components/app/ui";
-import { Users, MessageCircle, X } from "lucide-react";
+import { Users, MessageCircle, X, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Customers() {
@@ -47,97 +47,113 @@ export default function Customers() {
   const totalUdhaar = customers.reduce((s, c) => s + c.total_udhaar, 0);
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow={`${customers.length} customers · ${formatINR(totalUdhaar)} pending udhaar`}
         title="Customer Ledger"
         actions={null}
       />
 
-      <div className="bg-white border border-slate-300 rounded-sm p-3 mb-4">
+      <div className="bg-white border border-slate-300 rounded-sm p-3 mb-4 flex items-center gap-3">
+        <Search className="w-4 h-4 text-slate-500 shrink-0" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           data-testid="cust-search"
           placeholder="Search by name, phone, or plate…"
-          className="w-full bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900"
+          className="flex-1 bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900 min-w-0"
         />
+        {q && (
+          <button onClick={() => setQ("")} className="text-slate-500 hover:text-slate-900 shrink-0">
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm">
-          <table className="sharp text-sm" data-testid="customers-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Vehicles</th>
-                <th className="text-right">Visits</th>
-                <th className="text-right">Billed</th>
-                <th className="text-right">Udhaar</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((c, idx) => (
-                <tr
-                  key={idx}
-                  className={selected?.phone === c.phone ? "bg-slate-100" : "cursor-pointer"}
-                  onClick={() => open(c)}
-                  data-testid={`cust-row-${idx}`}
-                >
-                  <td className="font-semibold text-slate-900">{c.name || "—"}</td>
-                  <td className="font-mono-tab">{c.phone || "—"}</td>
-                  <td>
-                    <div className="flex flex-wrap gap-1">
-                      {c.vehicle_numbers.map((v) => (
-                        <Plate key={v}>{v}</Plate>
-                      ))}
-                      {c.vehicle_numbers.length === 0 && <span className="text-slate-400">—</span>}
-                    </div>
-                  </td>
-                  <td className="text-right font-mono-tab">{c.invoice_count}</td>
-                  <td className="text-right font-mono-tab font-bold">
-                    {formatINR(c.total_billed)}
-                  </td>
-                  <td
-                    className={`text-right font-mono-tab font-bold ${
-                      c.total_udhaar > 0 ? "text-red-700" : "text-slate-500"
-                    }`}
-                  >
-                    {formatINR(c.total_udhaar)}
-                  </td>
-                  <td>
-                    {c.total_udhaar > 0 && c.phone && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          remind(c);
-                        }}
-                        data-testid={`cust-remind-${idx}`}
-                        className="inline-flex items-center gap-1 text-[11px] border border-green-600 text-green-700 hover:bg-green-50 rounded-sm px-2 py-1 font-bold uppercase tracking-wider"
-                      >
-                        <MessageCircle className="w-3 h-3" /> Remind
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
+        <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm overflow-hidden">
+          <div className="overflow-auto">
+            <table className="sharp text-sm" data-testid="customers-table">
+              <thead>
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-500">
-                    <Users className="w-6 h-6 mx-auto mb-2 text-slate-400" />
-                    No customers found.
-                  </td>
+                  <th>Customer</th>
+                  <th className="hidden sm:table-cell">Phone</th>
+                  <th>Vehicles</th>
+                  <th className="text-right">Visits</th>
+                  <th className="text-right">Billed</th>
+                  <th className="text-right">Udhaar</th>
+                  <th></th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((c, idx) => (
+                  <tr
+                    key={idx}
+                    className={`cursor-pointer ${selected?.phone === c.phone ? "bg-slate-100" : ""}`}
+                    onClick={() => open(c)}
+                    data-testid={`cust-row-${idx}`}
+                  >
+                    <td className="font-semibold text-slate-900">
+                      {c.name || "—"}
+                      <span className="block text-[10px] text-slate-500 sm:hidden font-mono-tab">
+                        {c.phone || "—"}
+                      </span>
+                    </td>
+                    <td className="font-mono-tab hidden sm:table-cell">{c.phone || "—"}</td>
+                    <td>
+                      <div className="flex flex-wrap gap-1">
+                        {c.vehicle_numbers.slice(0, 2).map((v) => (
+                          <Plate key={v}>{v}</Plate>
+                        ))}
+                        {c.vehicle_numbers.length > 2 && (
+                          <span className="text-[10px] text-slate-500">+{c.vehicle_numbers.length - 2}</span>
+                        )}
+                        {c.vehicle_numbers.length === 0 && <span className="text-slate-400">—</span>}
+                      </div>
+                    </td>
+                    <td className="text-right font-mono-tab">{c.invoice_count}</td>
+                    <td className="text-right font-mono-tab font-bold">
+                      {formatINR(c.total_billed)}
+                    </td>
+                    <td
+                      className={`text-right font-mono-tab font-bold ${
+                        c.total_udhaar > 0 ? "text-red-700" : "text-slate-500"
+                      }`}
+                    >
+                      {formatINR(c.total_udhaar)}
+                    </td>
+                    <td>
+                      {c.total_udhaar > 0 && c.phone && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            remind(c);
+                          }}
+                          data-testid={`cust-remind-${idx}`}
+                          className="inline-flex items-center gap-1 text-[11px] border border-green-600 text-green-700 hover:bg-green-50 rounded-sm px-2 py-1 font-bold uppercase tracking-wider"
+                        >
+                          <MessageCircle className="w-3 h-3" /> <span className="hidden sm:inline">Remind</span>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-10 text-slate-500">
+                      <Users className="w-6 h-6 mx-auto mb-2 text-slate-400" />
+                      No customers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="bg-white border border-slate-300 rounded-sm">
           <div className="px-4 py-3 border-b border-slate-300 flex items-center justify-between">
-            <div className="font-display font-bold uppercase text-slate-900 tracking-tight">
+            <div className="font-display font-bold uppercase text-slate-900 tracking-tight text-sm">
               Ledger
             </div>
             {selected && (
@@ -160,7 +176,7 @@ export default function Customers() {
               <div className="text-xs uppercase tracking-widest text-slate-500 font-mono-tab">
                 {selected.phone}
               </div>
-              <div className="font-display font-black text-xl text-slate-900 uppercase">
+              <div className="font-display font-black text-lg sm:text-xl text-slate-900 uppercase">
                 {selected.name || "—"}
               </div>
               <div className="grid grid-cols-2 gap-2 mt-3 mb-3">
@@ -235,7 +251,7 @@ const StatBox = ({ label, value, tone = "slate" }) => (
       {label}
     </div>
     <div
-      className={`font-display font-black text-lg ${
+      className={`font-display font-black text-base sm:text-lg ${
         tone === "red" ? "text-red-700" : "text-slate-900"
       }`}
     >

@@ -43,7 +43,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <PageHeader
         eyebrow="Shop Identity · Branding"
         title="Settings"
@@ -55,12 +55,12 @@ export default function Settings() {
         className="grid grid-cols-1 lg:grid-cols-3 gap-4"
         data-testid="settings-form"
       >
-        <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm p-6 space-y-4">
+        <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm p-4 sm:p-6 space-y-4">
           <div>
             <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500 mb-1">
               Branding
             </div>
-            <h2 className="font-display font-bold text-xl uppercase tracking-tight text-slate-900">
+            <h2 className="font-display font-bold text-lg sm:text-xl uppercase tracking-tight text-slate-900">
               Shop Identity
             </h2>
           </div>
@@ -83,7 +83,7 @@ export default function Settings() {
               placeholder="e.g. Trusted since 1998"
             />
           </F>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <F label="Phone">
               <input
                 className="input font-mono-tab"
@@ -124,11 +124,11 @@ export default function Settings() {
           </button>
         </div>
 
-        <div className="bg-white border border-slate-300 rounded-sm p-6">
+        <div className="bg-white border border-slate-300 rounded-sm p-4 sm:p-6">
           <div className="text-[11px] font-mono-tab uppercase tracking-widest text-slate-500 mb-1">
             Logo
           </div>
-          <h2 className="font-display font-bold text-xl uppercase tracking-tight text-slate-900 mb-4">
+          <h2 className="font-display font-bold text-lg sm:text-xl uppercase tracking-tight text-slate-900 mb-4">
             Shop Logo
           </h2>
 
