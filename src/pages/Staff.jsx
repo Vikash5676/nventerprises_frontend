@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, formatINR, todayISO, monthISO } from "@/lib/api";
 import { PageHeader } from "@/components/app/ui";
-import { Plus, Trash2, UserPlus } from "lucide-react";
+import { Plus, Trash2, UserPlus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Staff() {
@@ -13,7 +13,17 @@ export default function Staff() {
   const [month, setMonth] = useState(monthISO());
   const [showStaff, setShowStaff] = useState(false);
   const [showAdv, setShowAdv] = useState(false);
-  const [staffForm, setStaffForm] = useState({ name: "", role: "Mechanic", phone: "", base_salary: 0, commission_pct: 0, pin: "" });
+  
+  // Track editing state
+  const [editingId, setEditingId] = useState(null);
+  const [staffForm, setStaffForm] = useState({ 
+    name: "", 
+    role: "Mechanic", 
+    phone: "", 
+    base_salary: 0, 
+    commission_pct: 0, 
+    pin: "" 
+  });
   const [advForm, setAdvForm] = useState({ staff_id: "", amount: 0, date: todayISO(), note: "" });
 
   const loadAll = async () => {
@@ -28,6 +38,7 @@ export default function Staff() {
     setAdvances(adv.data);
     setPayroll(pr.data);
   };
+
   useEffect(() => {
     loadAll();
     // eslint-disable-next-line
@@ -41,12 +52,35 @@ export default function Staff() {
     loadAll();
   };
 
-  const addStaff = async (e) => {
-    e.preventDefault();
-    await api.post("/staff", staffForm);
+  const resetStaffForm = () => {
     setStaffForm({ name: "", role: "Mechanic", phone: "", base_salary: 0, commission_pct: 0, pin: "" });
+    setEditingId(null);
     setShowStaff(false);
-    toast.success("Staff added");
+  };
+
+  const handleEdit = (member) => {
+    setEditingId(member.id);
+    setStaffForm({
+      name: member.name || "",
+      role: member.role || "Mechanic",
+      phone: member.phone || "",
+      base_salary: member.base_salary || 0,
+      commission_pct: member.commission_pct || 0,
+      pin: member.pin || "",
+    });
+    setShowStaff(true);
+  };
+
+  const saveStaff = async (e) => {
+    e.preventDefault();
+    if (editingId) {
+      await api.put(`/staff/${editingId}`, staffForm);
+      toast.success("Staff updated");
+    } else {
+      await api.post("/staff", staffForm);
+      toast.success("Staff added");
+    }
+    resetStaffForm();
     loadAll();
   };
 
@@ -73,18 +107,33 @@ export default function Staff() {
         title="Staff & Payroll"
         actions={
           <div className="flex gap-2 flex-wrap">
-            <button onClick={() => setShowAdv((v) => !v)} className="border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100" data-testid="new-adv-btn">
+            <button 
+              onClick={() => setShowAdv((v) => !v)} 
+              className="border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100" 
+              data-testid="new-adv-btn"
+            >
               <Plus className="inline w-3 h-3 mr-1" /> Advance
             </button>
-            <button onClick={() => setShowStaff((v) => !v)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors" data-testid="new-staff-btn">
-              <UserPlus className="inline w-3.5 h-3.5 mr-1" /> Add Staff
+            <button 
+              onClick={() => {
+                if (showStaff && editingId) {
+                  resetStaffForm();
+                } else {
+                  resetStaffForm();
+                  setShowStaff((v) => !v);
+                }
+              }} 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors" 
+              data-testid="new-staff-btn"
+            >
+              <UserPlus className="inline w-3.5 h-3.5 mr-1" /> {showStaff && editingId ? "Add Staff" : "Add Staff"}
             </button>
           </div>
         }
       />
 
       {showStaff && (
-        <form onSubmit={addStaff} data-testid="staff-form" className="bg-white border border-slate-300 rounded-sm p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <form onSubmit={saveStaff} data-testid="staff-form" className="bg-white border border-slate-300 rounded-sm p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <F label="Name" span="sm:col-span-2">
             <input required data-testid="staff-name" className="input" value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} />
           </F>
@@ -103,9 +152,12 @@ export default function Staff() {
           <F label="Mobile PIN (4-digit)">
             <input maxLength="4" pattern="[0-9]{4}" data-testid="staff-pin" className="input font-mono-tab tracking-widest" placeholder="1005" value={staffForm.pin} onChange={(e) => setStaffForm({ ...staffForm, pin: e.target.value.replace(/\D/g, "") })} />
           </F>
-          <div className="sm:col-span-2 lg:col-span-5 flex justify-end">
+          <div className="sm:col-span-2 lg:col-span-5 flex justify-end gap-2">
+            <button type="button" onClick={resetStaffForm} className="border border-slate-300 text-slate-700 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-50">
+              Cancel
+            </button>
             <button data-testid="staff-save" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-sm">
-              Save Staff
+              {editingId ? "Update Staff" : "Save Staff"}
             </button>
           </div>
         </form>
@@ -252,7 +304,7 @@ export default function Staff() {
                 <th className="hidden md:table-cell">Phone</th>
                 <th className="text-right">Base</th>
                 <th className="text-right hidden sm:table-cell">Comm. %</th>
-                <th></th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -266,10 +318,15 @@ export default function Staff() {
                   <td className="font-mono-tab hidden md:table-cell">{s.phone || "—"}</td>
                   <td className="text-right font-mono-tab">{formatINR(s.base_salary)}</td>
                   <td className="text-right font-mono-tab hidden sm:table-cell">{s.commission_pct}%</td>
-                  <td>
-                    <button onClick={() => removeStaff(s.id)} className="text-slate-400 hover:text-red-600">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                  <td className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => handleEdit(s)} className="text-slate-400 hover:text-blue-600" title="Edit Staff">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => removeStaff(s.id)} className="text-slate-400 hover:text-red-600" title="Delete Staff">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
