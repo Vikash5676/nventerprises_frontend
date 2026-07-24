@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, formatINR } from "@/lib/api";
 import { PageHeader } from "@/components/app/ui";
-import { Plus, Trash2, ShoppingCart } from "lucide-react";
+import { Plus, Trash2, ShoppingCart, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Purchases() {
@@ -9,7 +9,13 @@ export default function Purchases() {
   const [purchases, setPurchases] = useState([]);
   const [items, setItems] = useState([]);
   const [showSupplier, setShowSupplier] = useState(false);
-  const [supplierForm, setSupplierForm] = useState({ name: "", gstin: "", phone: "", address: "" });
+  const [editingSupplierId, setEditingSupplierId] = useState(null);
+  const [supplierForm, setSupplierForm] = useState({
+    name: "",
+    gstin: "",
+    phone: "",
+    address: "",
+  });
   const [purchaseForm, setPurchaseForm] = useState({
     supplier_id: "",
     invoice_no: "",
@@ -29,16 +35,38 @@ export default function Purchases() {
     setPurchases(p.data);
     setItems(i.data.filter((x) => x.item_type === "part"));
   };
+
   useEffect(() => {
     load();
   }, []);
 
-  const addSupplier = async (e) => {
-    e.preventDefault();
-    await api.post("/suppliers", supplierForm);
+  const resetSupplierForm = () => {
     setSupplierForm({ name: "", gstin: "", phone: "", address: "" });
+    setEditingSupplierId(null);
     setShowSupplier(false);
-    toast.success("Supplier added");
+  };
+
+  const handleEditSupplier = (supplier) => {
+    setEditingSupplierId(supplier.id);
+    setSupplierForm({
+      name: supplier.name || "",
+      gstin: supplier.gstin || "",
+      phone: supplier.phone || "",
+      address: supplier.address || "",
+    });
+    setShowSupplier(true);
+  };
+
+  const saveSupplier = async (e) => {
+    e.preventDefault();
+    if (editingSupplierId) {
+      await api.put(`/suppliers/${editingSupplierId}`, supplierForm);
+      toast.success("Supplier updated");
+    } else {
+      await api.post("/suppliers", supplierForm);
+      toast.success("Supplier added");
+    }
+    resetSupplierForm();
     load();
   };
 
@@ -51,7 +79,10 @@ export default function Purchases() {
   const addLine = () =>
     setPurchaseForm((f) => ({
       ...f,
-      lines: [...f.lines, { item_id: "", name: "", hsn_sac: "", qty: 1, unit_cost: 0 }],
+      lines: [
+        ...f.lines,
+        { item_id: "", name: "", hsn_sac: "", qty: 1, unit_cost: 0 },
+      ],
     }));
 
   const updateLine = (i, patch) =>
@@ -62,7 +93,10 @@ export default function Purchases() {
     });
 
   const removeLine = (i) =>
-    setPurchaseForm((f) => ({ ...f, lines: f.lines.filter((_, idx) => idx !== i) }));
+    setPurchaseForm((f) => ({
+      ...f,
+      lines: f.lines.filter((_, idx) => idx !== i),
+    }));
 
   const totalPurchase = purchaseForm.lines.reduce(
     (s, l) => s + Number(l.qty) * Number(l.unit_cost),
@@ -77,7 +111,13 @@ export default function Purchases() {
     }
     await api.post("/purchases", purchaseForm);
     toast.success("Purchase logged, stock updated, expense recorded");
-    setPurchaseForm({ supplier_id: "", invoice_no: "", lines: [], paid_amount: 0, notes: "" });
+    setPurchaseForm({
+      supplier_id: "",
+      invoice_no: "",
+      lines: [],
+      paid_amount: 0,
+      notes: "",
+    });
     setShowPurchase(false);
     load();
   };
@@ -90,7 +130,14 @@ export default function Purchases() {
         actions={
           <div className="flex gap-2 flex-wrap">
             <button
-              onClick={() => setShowSupplier((v) => !v)}
+              onClick={() => {
+                if (showSupplier && editingSupplierId) {
+                  resetSupplierForm();
+                } else {
+                  resetSupplierForm();
+                  setShowSupplier((v) => !v);
+                }
+              }}
               className="border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100"
               data-testid="new-supplier-btn"
             >
@@ -109,24 +156,61 @@ export default function Purchases() {
 
       {showSupplier && (
         <form
-          onSubmit={addSupplier}
+          onSubmit={saveSupplier}
           className="bg-white border border-slate-300 rounded-sm p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
         >
           <F label="Name" span="sm:col-span-2">
-            <input required data-testid="sup-name" className="input" value={supplierForm.name} onChange={(e) => setSupplierForm({ ...supplierForm, name: e.target.value })} />
+            <input
+              required
+              data-testid="sup-name"
+              className="input"
+              value={supplierForm.name}
+              onChange={(e) =>
+                setSupplierForm({ ...supplierForm, name: e.target.value })
+              }
+            />
           </F>
           <F label="GSTIN">
-            <input className="input font-mono-tab" value={supplierForm.gstin} onChange={(e) => setSupplierForm({ ...supplierForm, gstin: e.target.value })} />
+            <input
+              className="input font-mono-tab"
+              value={supplierForm.gstin}
+              onChange={(e) =>
+                setSupplierForm({ ...supplierForm, gstin: e.target.value })
+              }
+            />
           </F>
           <F label="Phone">
-            <input className="input font-mono-tab" value={supplierForm.phone} onChange={(e) => setSupplierForm({ ...supplierForm, phone: e.target.value })} />
+            <input
+              className="input font-mono-tab"
+              value={supplierForm.phone}
+              onChange={(e) =>
+                setSupplierForm({ ...supplierForm, phone: e.target.value })
+              }
+            />
           </F>
           <F label="Address" span="sm:col-span-2 lg:col-span-4">
-            <input className="input" value={supplierForm.address} onChange={(e) => setSupplierForm({ ...supplierForm, address: e.target.value })} />
+            <input
+              className="input"
+              value={supplierForm.address}
+              onChange={(e) =>
+                setSupplierForm({ ...supplierForm, address: e.target.value })
+              }
+            />
           </F>
-          <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
-            <button data-testid="sup-save" type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm">
-              Save Supplier
+          <div className="sm:col-span-2 lg:col-span-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={resetSupplierForm}
+              className="border border-slate-300 text-slate-700 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              data-testid="sup-save"
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm"
+            >
+              {editingSupplierId ? "Update Supplier" : "Save Supplier"}
             </button>
           </div>
         </form>
@@ -144,7 +228,12 @@ export default function Purchases() {
                 required
                 className="input"
                 value={purchaseForm.supplier_id}
-                onChange={(e) => setPurchaseForm({ ...purchaseForm, supplier_id: e.target.value })}
+                onChange={(e) =>
+                  setPurchaseForm({
+                    ...purchaseForm,
+                    supplier_id: e.target.value,
+                  })
+                }
                 data-testid="purchase-supplier"
               >
                 <option value="">— Select supplier —</option>
@@ -156,10 +245,30 @@ export default function Purchases() {
               </select>
             </F>
             <F label="Bill / Invoice No">
-              <input className="input font-mono-tab" value={purchaseForm.invoice_no} onChange={(e) => setPurchaseForm({ ...purchaseForm, invoice_no: e.target.value })} />
+              <input
+                className="input font-mono-tab"
+                value={purchaseForm.invoice_no}
+                onChange={(e) =>
+                  setPurchaseForm({
+                    ...purchaseForm,
+                    invoice_no: e.target.value,
+                  })
+                }
+              />
             </F>
             <F label="Paid Amount">
-              <input type="number" step="0.01" className="input font-mono-tab" value={purchaseForm.paid_amount} onChange={(e) => setPurchaseForm({ ...purchaseForm, paid_amount: Number(e.target.value) })} />
+              <input
+                type="number"
+                step="0.01"
+                className="input font-mono-tab"
+                value={purchaseForm.paid_amount}
+                onChange={(e) =>
+                  setPurchaseForm({
+                    ...purchaseForm,
+                    paid_amount: Number(e.target.value),
+                  })
+                }
+              />
             </F>
           </div>
 
@@ -170,7 +279,9 @@ export default function Purchases() {
                   <th>Part</th>
                   <th className="text-right">Qty</th>
                   <th className="text-right">Unit Cost</th>
-                  <th className="text-right hidden sm:table-cell">Line Total</th>
+                  <th className="text-right hidden sm:table-cell">
+                    Line Total
+                  </th>
                   <th></th>
                 </tr>
               </thead>
@@ -182,7 +293,9 @@ export default function Purchases() {
                         className="input"
                         value={l.item_id}
                         onChange={(e) => {
-                          const item = items.find((x) => x.id === e.target.value);
+                          const item = items.find(
+                            (x) => x.id === e.target.value,
+                          );
                           updateLine(i, {
                             item_id: e.target.value,
                             name: item?.name || "",
@@ -199,16 +312,37 @@ export default function Purchases() {
                       </select>
                     </td>
                     <td className="text-right">
-                      <input type="number" min="0" step="0.5" className="input text-right font-mono-tab w-16 sm:w-20" value={l.qty} onChange={(e) => updateLine(i, { qty: Number(e.target.value) })} />
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        className="input text-right font-mono-tab w-16 sm:w-20"
+                        value={l.qty}
+                        onChange={(e) =>
+                          updateLine(i, { qty: Number(e.target.value) })
+                        }
+                      />
                     </td>
                     <td className="text-right">
-                      <input type="number" step="0.01" className="input text-right font-mono-tab w-20 sm:w-24" value={l.unit_cost} onChange={(e) => updateLine(i, { unit_cost: Number(e.target.value) })} />
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="input text-right font-mono-tab w-20 sm:w-24"
+                        value={l.unit_cost}
+                        onChange={(e) =>
+                          updateLine(i, { unit_cost: Number(e.target.value) })
+                        }
+                      />
                     </td>
                     <td className="text-right font-mono-tab font-bold hidden sm:table-cell">
                       {formatINR(l.qty * l.unit_cost)}
                     </td>
                     <td>
-                      <button type="button" onClick={() => removeLine(i)} className="text-slate-400 hover:text-red-600">
+                      <button
+                        type="button"
+                        onClick={() => removeLine(i)}
+                        className="text-slate-400 hover:text-red-600"
+                      >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
@@ -217,10 +351,16 @@ export default function Purchases() {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="2" className="text-right font-bold uppercase text-xs tracking-widest hidden sm:table-cell">
+                  <td
+                    colSpan="2"
+                    className="text-right font-bold uppercase text-xs tracking-widest hidden sm:table-cell"
+                  >
                     Total
                   </td>
-                  <td colSpan="2" className="text-right font-bold uppercase text-xs tracking-widest sm:hidden">
+                  <td
+                    colSpan="2"
+                    className="text-right font-bold uppercase text-xs tracking-widest sm:hidden"
+                  >
                     Total: {formatINR(totalPurchase)}
                   </td>
                   <td className="text-right font-mono-tab font-black text-slate-900 hidden sm:table-cell">
@@ -233,10 +373,18 @@ export default function Purchases() {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-center mt-3 gap-2">
-            <button type="button" onClick={addLine} className="border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={addLine}
+              className="border border-slate-900 text-slate-900 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100 w-full sm:w-auto"
+            >
               <Plus className="inline w-3 h-3 mr-1" /> Add Line
             </button>
-            <button data-testid="purchase-save" type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-sm w-full sm:w-auto">
+            <button
+              data-testid="purchase-save"
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-sm w-full sm:w-auto"
+            >
               Save Purchase
             </button>
           </div>
@@ -255,7 +403,7 @@ export default function Purchases() {
                   <th>Name</th>
                   <th className="hidden sm:table-cell">GSTIN</th>
                   <th className="text-right">Payable</th>
-                  <th></th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -267,14 +415,31 @@ export default function Purchases() {
                         {s.gstin || "—"}
                       </span>
                     </td>
-                    <td className="font-mono-tab hidden sm:table-cell">{s.gstin || "—"}</td>
-                    <td className={`text-right font-mono-tab font-bold ${s.payable_balance > 0 ? "text-red-700" : "text-slate-900"}`}>
+                    <td className="font-mono-tab hidden sm:table-cell">
+                      {s.gstin || "—"}
+                    </td>
+                    <td
+                      className={`text-right font-mono-tab font-bold ${s.payable_balance > 0 ? "text-red-700" : "text-slate-900"}`}
+                    >
                       {formatINR(s.payable_balance)}
                     </td>
-                    <td>
-                      <button onClick={() => removeSupplier(s.id)} className="text-slate-400 hover:text-red-600">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditSupplier(s)}
+                          className="text-slate-400 hover:text-blue-600"
+                          title="Edit Supplier"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => removeSupplier(s.id)}
+                          className="text-slate-400 hover:text-red-600"
+                          title="Delete Supplier"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -309,16 +474,24 @@ export default function Purchases() {
               <tbody>
                 {purchases.map((p) => (
                   <tr key={p.id}>
-                    <td className="font-mono-tab">{p.created_at.slice(0, 10)}</td>
+                    <td className="font-mono-tab">
+                      {p.created_at.slice(0, 10)}
+                    </td>
                     <td className="font-semibold">
                       {p.supplier_name}
                       <span className="block text-[10px] text-slate-500 sm:hidden font-mono-tab">
                         {p.invoice_no || "—"}
                       </span>
                     </td>
-                    <td className="font-mono-tab hidden sm:table-cell">{p.invoice_no || "—"}</td>
-                    <td className="text-right font-mono-tab font-bold">{formatINR(p.total)}</td>
-                    <td className={`text-right font-mono-tab ${p.balance > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                    <td className="font-mono-tab hidden sm:table-cell">
+                      {p.invoice_no || "—"}
+                    </td>
+                    <td className="text-right font-mono-tab font-bold">
+                      {formatINR(p.total)}
+                    </td>
+                    <td
+                      className={`text-right font-mono-tab ${p.balance > 0 ? "text-red-700" : "text-emerald-700"}`}
+                    >
                       {formatINR(p.balance)}
                     </td>
                   </tr>
