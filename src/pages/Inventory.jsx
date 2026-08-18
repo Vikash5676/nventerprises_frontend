@@ -11,6 +11,7 @@ import {
   PackagePlus,
   Upload,
   Pencil,
+  Printer,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -81,6 +82,10 @@ export default function Inventory() {
     if (!window.confirm("Delete this item?")) return;
     await api.delete(`/inventory/${id}`);
     load();
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const lowCount = items.filter(
@@ -159,6 +164,13 @@ export default function Inventory() {
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-sm font-bold uppercase tracking-wider text-xs transition-colors"
             >
               <Plus className="w-4 h-4" /> Add Item
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex items-center gap-2 border border-slate-900 text-slate-900 px-3 py-2 rounded-sm font-bold uppercase tracking-wider text-xs hover:bg-slate-100 transition-colors print:hidden"
+            >
+              <Printer className="w-3.5 h-3.5" /> Print
             </button>
           </div>
         }
@@ -409,3 +421,38 @@ function F({ label, span = "", children }) {
     </label>
   );
 }
+
+<style>{`
+  .input { width: 100%; border: 1px solid #cbd5e1; border-radius: 2px; background: white; padding: 8px 10px; color: #0f172a; outline: none; }
+  .input:focus { border-color: #0f172a; box-shadow: 0 0 0 1px #0f172a; }
+
+  @media print {
+    /* Hide navigation, buttons, forms, search bar, and action icons */
+    button, input, label, form, .print\\:hidden {
+      display: none !important;
+    }
+    
+    /* Ensure background is clean white */
+    body, div {
+      background: #fff !important;
+      color: #000 !important;
+      box-shadow: none !important;
+    }
+
+    /* Expand table to full page width */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+    th, td {
+      border: 1px solid #cbd5e1 !important;
+      padding: 6px 8px !important;
+      font-size: 11px !important;
+    }
+    
+    /* Show mobile-hidden columns in printout */
+    .hidden {
+      display: table-cell !important;
+    }
+  }
+`}</style>;
