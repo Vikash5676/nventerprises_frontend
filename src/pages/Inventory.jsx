@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { api, formatINR } from "@/lib/api";
 import { PageHeader } from "@/components/app/ui";
-import { Search, Plus, Save, X, TriangleAlert as AlertTriangle, Trash2, PackagePlus, Upload } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Save,
+  X,
+  TriangleAlert as AlertTriangle,
+  Trash2,
+  PackagePlus,
+  Upload,
+  Pencil,
+} from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
@@ -99,29 +109,38 @@ export default function Inventory() {
                   const text = await file.text();
                   const lines = text.split(/\r?\n/).filter((l) => l.trim());
                   if (lines.length < 2) return toast.error("CSV appears empty");
-                  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
-                  const rows = lines.slice(1).map((line) => {
-                    const cols = line.split(",").map((c) => c.trim());
-                    const obj = {};
-                    headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
-                    return {
-                      name: obj.name || obj["part name"] || "",
-                      item_type: obj.item_type || "part",
-                      hsn_sac: obj.hsn_sac || obj.hsn || "",
-                      stock: Number(obj.stock || 0),
-                      unit_price: Number(obj.unit_price || obj.price || 0),
-                      low_stock_threshold: Number(obj.low_stock_threshold || obj.threshold || 5),
-                      rack_location: obj.rack_location || obj.rack || "",
-                      gst_rate: Number(obj.gst_rate || obj.gst || 18),
-                      barcode: obj.barcode || null,
-                    };
-                  }).filter((r) => r.name);
+                  const headers = lines[0]
+                    .split(",")
+                    .map((h) => h.trim().toLowerCase());
+                  const rows = lines
+                    .slice(1)
+                    .map((line) => {
+                      const cols = line.split(",").map((c) => c.trim());
+                      const obj = {};
+                      headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
+                      return {
+                        name: obj.name || obj["part name"] || "",
+                        item_type: obj.item_type || "part",
+                        hsn_sac: obj.hsn_sac || obj.hsn || "",
+                        stock: Number(obj.stock || 0),
+                        unit_price: Number(obj.unit_price || obj.price || 0),
+                        low_stock_threshold: Number(
+                          obj.low_stock_threshold || obj.threshold || 5,
+                        ),
+                        rack_location: obj.rack_location || obj.rack || "",
+                        gst_rate: Number(obj.gst_rate || obj.gst || 18),
+                        barcode: obj.barcode || null,
+                      };
+                    })
+                    .filter((r) => r.name);
                   try {
                     const { data } = await api.post("/inventory/bulk_import", {
                       rows,
                       upsert_by_barcode: true,
                     });
-                    toast.success(`Imported: ${data.created} created, ${data.updated} updated`);
+                    toast.success(
+                      `Imported: ${data.created} created, ${data.updated} updated`,
+                    );
                     load();
                   } catch {
                     toast.error("Import failed");
@@ -157,7 +176,10 @@ export default function Inventory() {
           className="flex-1 bg-transparent focus:outline-none font-mono-tab tracking-wide text-slate-900 min-w-0"
         />
         {q && (
-          <button onClick={() => setQ("")} className="text-slate-500 hover:text-slate-900 shrink-0">
+          <button
+            onClick={() => setQ("")}
+            className="text-slate-500 hover:text-slate-900 shrink-0"
+          >
             <X className="w-4 h-4" />
           </button>
         )}
@@ -170,7 +192,13 @@ export default function Inventory() {
           className="bg-white border border-slate-300 rounded-sm p-4 sm:p-5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
         >
           <F label="Name" span="sm:col-span-2">
-            <input required className="input" value={form.name} onChange={(e) => setF("name", e.target.value)} data-testid="inv-name" />
+            <input
+              required
+              className="input"
+              value={form.name}
+              onChange={(e) => setF("name", e.target.value)}
+              data-testid="inv-name"
+            />
           </F>
           <F label="Item Type">
             <div className="flex border border-slate-300 rounded-sm overflow-hidden">
@@ -187,29 +215,64 @@ export default function Inventory() {
             </div>
           </F>
           <F label="HSN / SAC">
-            <input className="input font-mono-tab" value={form.hsn_sac} onChange={(e) => setF("hsn_sac", e.target.value)} />
+            <input
+              className="input font-mono-tab"
+              value={form.hsn_sac}
+              onChange={(e) => setF("hsn_sac", e.target.value)}
+            />
           </F>
           {form.item_type === "part" && (
             <>
               <F label="Stock">
-                <input type="number" className="input font-mono-tab" value={form.stock} onChange={(e) => setF("stock", Number(e.target.value))} />
+                <input
+                  type="number"
+                  className="input font-mono-tab"
+                  value={form.stock}
+                  onChange={(e) => setF("stock", Number(e.target.value))}
+                />
               </F>
               <F label="Low-Stock Threshold">
-                <input type="number" className="input font-mono-tab" value={form.low_stock_threshold} onChange={(e) => setF("low_stock_threshold", Number(e.target.value))} />
+                <input
+                  type="number"
+                  className="input font-mono-tab"
+                  value={form.low_stock_threshold}
+                  onChange={(e) =>
+                    setF("low_stock_threshold", Number(e.target.value))
+                  }
+                />
               </F>
               <F label="Rack / Shelf">
-                <input className="input font-mono-tab" placeholder="Rack A, Shelf 2" value={form.rack_location} onChange={(e) => setF("rack_location", e.target.value)} />
+                <input
+                  className="input font-mono-tab"
+                  placeholder="Rack A, Shelf 2"
+                  value={form.rack_location}
+                  onChange={(e) => setF("rack_location", e.target.value)}
+                />
               </F>
               <F label="Barcode">
-                <input className="input font-mono-tab" value={form.barcode || ""} onChange={(e) => setF("barcode", e.target.value)} />
+                <input
+                  className="input font-mono-tab"
+                  value={form.barcode || ""}
+                  onChange={(e) => setF("barcode", e.target.value)}
+                />
               </F>
             </>
           )}
           <F label="Unit Price (₹)">
-            <input type="number" step="0.01" className="input font-mono-tab" value={form.unit_price} onChange={(e) => setF("unit_price", Number(e.target.value))} />
+            <input
+              type="number"
+              step="0.01"
+              className="input font-mono-tab"
+              value={form.unit_price}
+              onChange={(e) => setF("unit_price", Number(e.target.value))}
+            />
           </F>
           <F label="GST Rate (%)">
-            <select className="input font-mono-tab" value={form.gst_rate} onChange={(e) => setF("gst_rate", Number(e.target.value))}>
+            <select
+              className="input font-mono-tab"
+              value={form.gst_rate}
+              onChange={(e) => setF("gst_rate", Number(e.target.value))}
+            >
               {[0, 5, 12, 18, 28].map((r) => (
                 <option key={r} value={r}>
                   {r}%
@@ -218,10 +281,18 @@ export default function Inventory() {
             </select>
           </F>
           <div className="sm:col-span-2 lg:col-span-4 flex justify-end gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="border border-slate-900 text-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100">
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="border border-slate-900 text-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-sm hover:bg-slate-100"
+            >
               Cancel
             </button>
-            <button data-testid="inv-save" type="submit" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors">
+            <button
+              data-testid="inv-save"
+              type="submit"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors"
+            >
               <Save className="w-3.5 h-3.5" /> {editId ? "Update" : "Save"} Item
             </button>
           </div>
@@ -246,17 +317,27 @@ export default function Inventory() {
             </thead>
             <tbody>
               {items.map((i) => {
-                const low = i.item_type === "part" && i.stock <= i.low_stock_threshold;
+                const low =
+                  i.item_type === "part" && i.stock <= i.low_stock_threshold;
                 return (
-                  <tr key={i.id} className={low ? "bg-red-50" : ""} data-testid={`inv-row-${i.id}`}>
-                    <td className="font-semibold text-slate-900 cursor-pointer" onClick={() => startEdit(i)}>
+                  <tr
+                    key={i.id}
+                    className={low ? "bg-red-50" : ""}
+                    data-testid={`inv-row-${i.id}`}
+                  >
+                    <td
+                      className="font-semibold text-slate-900 cursor-pointer"
+                      onClick={() => startEdit(i)}
+                    >
                       {i.name}
                       <span className="block text-[10px] text-slate-500 sm:hidden">
                         {i.rack_location || "—"} · {i.gst_rate}% GST
                       </span>
                     </td>
                     <td>
-                      <span className={`text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-sm border ${i.item_type === "labor" ? "border-blue-300 bg-blue-50 text-blue-800" : "border-slate-300 bg-slate-100 text-slate-700"}`}>
+                      <span
+                        className={`text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-sm border ${i.item_type === "labor" ? "border-blue-300 bg-blue-50 text-blue-800" : "border-slate-300 bg-slate-100 text-slate-700"}`}
+                      >
                         {i.item_type === "labor" ? "Labor" : "Part"}
                       </span>
                     </td>
@@ -266,11 +347,15 @@ export default function Inventory() {
                     <td className="text-right font-mono-tab text-slate-600 hidden sm:table-cell">
                       {i.item_type === "labor" ? "—" : i.low_stock_threshold}
                     </td>
-                    <td className="font-mono-tab text-slate-700 hidden md:table-cell">{i.rack_location || "—"}</td>
+                    <td className="font-mono-tab text-slate-700 hidden md:table-cell">
+                      {i.rack_location || "—"}
+                    </td>
                     <td className="text-right font-mono-tab font-bold text-slate-900">
                       {formatINR(i.unit_price)}
                     </td>
-                    <td className="text-right font-mono-tab text-slate-700 hidden sm:table-cell">{i.gst_rate}%</td>
+                    <td className="text-right font-mono-tab text-slate-700 hidden sm:table-cell">
+                      {i.gst_rate}%
+                    </td>
                     <td>
                       <div className="flex items-center gap-2 justify-end">
                         {low && (
@@ -278,7 +363,19 @@ export default function Inventory() {
                             <AlertTriangle className="w-3 h-3" /> Low
                           </span>
                         )}
-                        <button onClick={() => remove(i.id)} className="text-slate-400 hover:text-red-600">
+                        <button
+                          onClick={() => startEdit(i)}
+                          className="text-slate-400 hover:text-blue-600 transition-colors"
+                          title="Edit item"
+                          data-testid={`inv-edit-${i.id}`}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => remove(i.id)}
+                          className="text-slate-400 hover:text-red-600 transition-colors"
+                          title="Delete item"
+                        >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
