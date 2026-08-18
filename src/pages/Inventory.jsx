@@ -404,40 +404,6 @@ export default function Inventory() {
           </table>
         </div>
       </div>
-      <style>{`
-  .input { width: 100%; border: 1px solid #cbd5e1; border-radius: 2px; background: white; padding: 8px 10px; color: #0f172a; outline: none; }
-  .input:focus { border-color: #0f172a; box-shadow: 0 0 0 1px #0f172a; }
-
-  @media print {
-    /* Hide navigation, buttons, forms, search bar, and action icons */
-    button, input, label, form, .print\\:hidden {
-      display: none !important;
-    }
-    
-    /* Ensure background is clean white */
-    body, div {
-      background: #fff !important;
-      color: #000 !important;
-      box-shadow: none !important;
-    }
-
-    /* Expand table to full page width */
-    table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-    }
-    th, td {
-      border: 1px solid #cbd5e1 !important;
-      padding: 6px 8px !important;
-      font-size: 11px !important;
-    }
-    
-    /* Show mobile-hidden columns in printout */
-    .hidden {
-      display: table-cell !important;
-    }
-  }
-`}</style>
     </div>
   );
 }
