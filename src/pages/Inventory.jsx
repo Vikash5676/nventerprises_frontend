@@ -175,7 +175,6 @@ export default function Inventory() {
           </div>
         }
       />
-
       <div className="bg-white border border-slate-300 rounded-sm p-3 mb-4 flex items-center gap-3">
         <Search className="w-4 h-4 text-slate-500 shrink-0" />
         <input
@@ -196,7 +195,6 @@ export default function Inventory() {
           </button>
         )}
       </div>
-
       {showForm && (
         <form
           onSubmit={submit}
@@ -311,7 +309,6 @@ export default function Inventory() {
           <style>{`.input{width:100%;border:1px solid #cbd5e1;border-radius:2px;background:white;padding:8px 10px;color:#0f172a;outline:none}.input:focus{border-color:#0f172a;box-shadow:0 0 0 1px #0f172a}`}</style>
         </form>
       )}
-
       <div className="bg-white border border-slate-300 rounded-sm">
         <div className="overflow-auto">
           <table className="sharp text-sm" data-testid="inv-table">
@@ -407,22 +404,7 @@ export default function Inventory() {
           </table>
         </div>
       </div>
-    </div>
-  );
-}
-
-function F({ label, span = "", children }) {
-  return (
-    <label className={`block ${span}`}>
-      <span className="block text-[11px] font-bold uppercase tracking-widest text-slate-700 mb-1">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-<style>{`
+      <style>{`
   .input { width: 100%; border: 1px solid #cbd5e1; border-radius: 2px; background: white; padding: 8px 10px; color: #0f172a; outline: none; }
   .input:focus { border-color: #0f172a; box-shadow: 0 0 0 1px #0f172a; }
 
@@ -455,4 +437,18 @@ function F({ label, span = "", children }) {
       display: table-cell !important;
     }
   }
-`}</style>;
+`}</style>
+    </div>
+  );
+}
+
+function F({ label, span = "", children }) {
+  return (
+    <label className={`block ${span}`}>
+      <span className="block text-[11px] font-bold uppercase tracking-widest text-slate-700 mb-1">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
