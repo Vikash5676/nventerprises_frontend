@@ -10,6 +10,7 @@ import {
   Trash2,
   PackagePlus,
   Upload,
+  Download,
   Pencil,
   Printer,
 } from "lucide-react";
@@ -88,6 +89,57 @@ export default function Inventory() {
     window.print();
   };
 
+  const downloadTemplate = () => {
+    const headers = [
+      "name",
+      "item_type",
+      "hsn_sac",
+      "stock",
+      "unit_price",
+      "low_stock_threshold",
+      "rack_location",
+      "gst_rate",
+      "barcode",
+    ];
+
+    const sampleRows = [
+      [
+        "Engine Oil 10W-30 (1L)",
+        "part",
+        "27101980",
+        "20",
+        "420",
+        "5",
+        "Rack A, Shelf 1",
+        "18",
+        "8901030100011",
+      ],
+      [
+        "General Service",
+        "labor",
+        "998714",
+        "0",
+        "450",
+        "0",
+        "-",
+        "18",
+        "",
+      ],
+    ];
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...sampleRows.map((e) => e.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "inventory_import_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const lowCount = items.filter(
     (i) => i.item_type === "part" && i.stock <= i.low_stock_threshold,
   ).length;
@@ -99,6 +151,14 @@ export default function Inventory() {
         title="Inventory"
         actions={
           <div className="flex gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              data-testid="csv-template-btn"
+              className="inline-flex items-center gap-2 border border-slate-900 text-slate-900 px-3 py-2 rounded-sm font-bold uppercase tracking-wider text-xs hover:bg-slate-100 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" /> Template
+            </button>
             <label
               data-testid="csv-import-btn"
               className="cursor-pointer inline-flex items-center gap-2 border border-slate-900 text-slate-900 px-3 py-2 rounded-sm font-bold uppercase tracking-wider text-xs hover:bg-slate-100 transition-colors"
